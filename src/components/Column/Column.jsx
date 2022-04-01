@@ -1,4 +1,4 @@
-import { Form, Input, Button, Empty } from "antd";
+import { Form, Empty } from "antd";
 import Ticket from "../Ticket/Ticket";
 import {
   ColumnContainer,
@@ -13,7 +13,6 @@ import {
   ADD_LIST_TASK,
   DELETE_LIST,
   DELETE_LIST_TASK,
-  UPDATE_TASK_LIST,
 } from "../../store/actions/lists.actions";
 import { useEffect, useState } from "react";
 
@@ -21,20 +20,18 @@ const Column = ({ setModalVisible, list }) => {
   const [dragItem, setDragItem] = useState(null);
   const [seletedItemId, setSelectedItem] = useState(null);
   const dispatch = useDispatch();
-  const onDropEvent = (e, target) => {
+  const onDropEvent = (e) => {
     e.preventDefault();
-    // dispatch({type: UPDATE_TASK_LIST, payload: { newListId: e.currentTarget.id, taskId: seletedItemId }})
   };
 
   useEffect(() => {
-    if (dragItem?.listId) {
-      setSelectedItem(dragItem?.id);
+    if (dragItem && dragItem?.listId && seletedItemId) {
       dispatch({ type: DELETE_LIST_TASK, payload: { taskId: dragItem?.id } });
       setTimeout(() => {
         dispatch({
           type: ADD_LIST_TASK,
           payload: {
-            listId: dragItem.listId,
+            listId: seletedItemId,
             task: {
               id: dragItem?.id,
               name: dragItem.name,
@@ -44,9 +41,9 @@ const Column = ({ setModalVisible, list }) => {
         });
       }, 500);
     }
-  }, [dragItem]);
+  }, [dragItem, seletedItemId]);
 
-  const dragHandler = (task, listId) => {
+  const dragHandler = (e, task, listId) => {
     setDragItem({
       id: task?.id,
       name: {
@@ -55,6 +52,7 @@ const Column = ({ setModalVisible, list }) => {
       },
       listId,
     });
+    e.preventDefault();
   };
 
   const deleteColumn = () => {

@@ -1,4 +1,4 @@
-import { Input, Layout, Modal, Button, Form } from "antd";
+import { Input, Modal, Button, Form } from "antd";
 import { useState } from "react";
 import Column from "../Column/Column";
 import {
@@ -10,7 +10,6 @@ import ModalContainer from "../../shared/Modal/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import {
   CREATE_LIST,
-  UPDATE_LIST,
   ADD_LIST_TASK,
 } from "../../store/actions/lists.actions";
 
@@ -21,6 +20,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const [listForm] = Form.useForm();
+  const [ticketForm] = Form.useForm();
 
   const addNewTicket = (ticketName, ticketDescription) => {
     setLoading(true);
@@ -38,6 +38,8 @@ const Dashboard = () => {
     setTimeout(() => {
       setModalVisible(false);
       setLoading(false);
+          ticketForm.resetFields();
+
     }, 2000);
   };
 
@@ -54,16 +56,26 @@ const Dashboard = () => {
     }, 2000);
   };
 
-  const closeModalAndReset = () => {
-    setListModalVisible(false);
-    listForm.resetFields();
+  const closeModalAndReset = (modalType) => {
+    if(modalType === 'list') {
+        setListModalVisible(false);
+        listForm.resetFields();
+        return;
+    }
+    setModalVisible(false);
+    ticketForm.resetFields();
   };
 
   return (
     <>
       <ModalContainer>
-        <Modal title="Add new ticket" visible={!!modalVisible} footer={null}>
-          <Form onFinish={addNewTicket} name="ticketForm">
+        <Modal 
+            title="Add new ticket" 
+            visible={!!modalVisible} 
+            footer={null}
+            onCancel={() => closeModalAndReset('ticket')}
+        >
+          <Form onFinish={addNewTicket} name="ticketForm" form={ticketForm}>
             <Form.Item
               name="ticketName"
               label="Ticket name"
@@ -91,7 +103,7 @@ const Dashboard = () => {
                   Create
                 </Button>
               </Form.Item>
-              <Button onClick={closeModalAndReset} type="ghost">
+              <Button onClick={() => closeModalAndReset('ticket')} type="ghost">
                 Cancel
               </Button>
             </ModalButtonsContainer>
@@ -103,13 +115,16 @@ const Dashboard = () => {
           title="Add new list"
           visible={listModalVisible}
           footer={null}
-          onCancel={closeModalAndReset}
+          onCancel={() => closeModalAndReset('list')}
         >
           <Form onFinish={addNewList} name="listForm" form={listForm}>
             <Form.Item
               name="listName"
               label="List name"
-              rules={[{ required: true, message: "List name is required!" }]}
+              rules={[
+                  { required: true, message: "List name is required!" },
+                  { pattern: new RegExp(/^[A-Za-z0-9]+$/) , message: "Please enter name in this format Aa-Zz, 0-9" }
+                ]}
             >
               <Input name="listName" placeholder="List name" />
             </Form.Item>
@@ -122,7 +137,7 @@ const Dashboard = () => {
               >
                 Create
               </Button>
-              <Button onClick={closeModalAndReset} type="ghost">
+              <Button onClick={() => closeModalAndReset('list')} type="ghost">
                 Cancel
               </Button>
             </Form.Item>

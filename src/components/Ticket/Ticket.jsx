@@ -51,7 +51,7 @@ const Ticket = ({ task, listId, draggable, onDrag }) => {
       <Card
         key={listId}
         draggable={draggable}
-        onDragStart={() => onDrag(task, listId)}
+        onDrag={(e) => onDrag(e, task, listId)}
         style={{
           width: "calc(100% - 10px)",
           margin: 10,
